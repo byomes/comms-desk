@@ -1,5 +1,13 @@
 import type { Metadata } from 'next'
+import { Inter } from 'next/font/google'
+import { Toaster } from 'sonner'
 import './globals.css'
+
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-inter',
+  display: 'swap',
+})
 
 export const metadata: Metadata = {
   title: 'Comms Desk',
@@ -8,8 +16,11 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
-      <body className="bg-gray-50 text-gray-900 antialiased">{children}</body>
+    <html lang="en" className={inter.variable}>
+      <body className="bg-cream-100 text-navy-900 antialiased font-sans">
+        {children}
+        <Toaster position="bottom-right" richColors closeButton />
+      </body>
     </html>
   )
 }
