@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Calendar, Mail, ShieldCheck, LogOut, Menu, X, Send } from 'lucide-react'
+import { Calendar, Mail, LogOut, Menu, X, Send } from 'lucide-react'
 import FacebookGlyph from './icons/FacebookGlyph'
 
 const NAV_ITEMS = [
@@ -23,7 +23,7 @@ function Wordmark() {
   )
 }
 
-function NavLinks({ role, onNavigate }: { role: 'volunteer' | 'admin'; onNavigate?: () => void }) {
+function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname()
   return (
     <nav className="flex flex-col gap-1">
@@ -46,17 +46,6 @@ function NavLinks({ role, onNavigate }: { role: 'volunteer' | 'admin'; onNavigat
           </Link>
         )
       })}
-      {role === 'admin' && (
-        <Link
-          href="/admin"
-          onClick={onNavigate}
-          className="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-300 hover:bg-navy-800/60 hover:text-white transition-colors"
-        >
-          <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-transparent" />
-          <ShieldCheck size={17} strokeWidth={2} className="text-slate-400 group-hover:text-slate-200" />
-          Bill&apos;s view
-        </Link>
-      )}
     </nav>
   )
 }
@@ -85,7 +74,7 @@ export default function NavBar({
           <Wordmark />
         </div>
         <div className="flex-1 overflow-y-auto px-3 py-4">
-          <NavLinks role={role} />
+          <NavLinks />
         </div>
         <div className="px-3 py-4 border-t border-navy-800/70">
           <div className="flex items-center justify-between px-1">
@@ -135,7 +124,7 @@ export default function NavBar({
               </button>
             </div>
             <div className="flex-1 overflow-y-auto px-3 py-4">
-              <NavLinks role={role} onNavigate={() => setMobileOpen(false)} />
+              <NavLinks onNavigate={() => setMobileOpen(false)} />
             </div>
             <div className="px-3 py-4 border-t border-navy-800/70">
               <div className="flex items-center justify-between px-1">
