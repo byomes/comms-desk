@@ -11,7 +11,7 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: 'Comms Desk',
-  description: 'Facebook & email scheduling for Writing Room comms',
+  description: 'Facebook & email scheduling for Faith Makes Sense comms',
 }
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

@@ -210,7 +210,7 @@ export default function FacebookComposer() {
                 <Send size={14} className="text-navy-500" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-navy-900">Writing Room</p>
+                <p className="text-sm font-semibold text-navy-900">Faith Makes Sense</p>
                 <p className="text-xs text-slate-400">Just now</p>
               </div>
             </div>
