@@ -60,6 +60,7 @@ export interface CommsSend {
   subject: string | null
   body_text: string
   image_path: string | null
+  needs_image?: number
   status: 'scheduled' | 'previewed' | 'approved' | 'edited' | 'sent' | 'skipped'
   source: string
   author_user_id: number
@@ -68,6 +69,28 @@ export interface CommsSend {
   recipient_detail?: string | null
   holdReleasesAt?: string
   holdId?: number
+}
+
+// Facebook-only, per row. 'none' = manual image_path as before (or no image).
+// 'ai_quote' renders a branded quote card server-side. 'needs_manual' flags
+// the row for a "needs photo" badge until someone attaches one.
+export type ImageIntent = 'none' | 'ai_quote' | 'needs_manual'
+
+export interface BatchSendItem {
+  platform: 'facebook' | 'brevo'
+  segment: string
+  send_date: string
+  subject?: string
+  body_text: string
+  image_intent?: ImageIntent
+  quote_text?: string
+  quote_attribution?: string
+}
+
+export interface BatchResult {
+  ok: boolean
+  id?: number
+  error?: string
 }
 
 export interface BrevoList {
@@ -103,8 +126,15 @@ export const commsApi = {
     body: Partial<CommsSend> & { send_date: string; platform: string; body_text: string } & (
       | { recipient_mode?: 'segment'; segment: string }
       | { recipient_mode: 'brevo_list' | 'custom_emails'; recipient_detail: object }
-    ),
+    ) & {
+      image_intent?: ImageIntent
+      quote_text?: string
+      quote_attribution?: string
+    },
   ) => watsonPost<{ id: number }>('/api/comms/sends', { as_user_id: asUserId, ...body }),
+
+  batchCreateSends: (asUserId: number, items: BatchSendItem[]) =>
+    watsonPost<{ results: BatchResult[] }>('/api/comms/sends/batch', { as_user_id: asUserId, items }),
 
   getBrevoLists: (asUserId: number) => watsonGet<BrevoList[]>(`/api/comms/brevo/lists?as_user_id=${asUserId}`),
 
