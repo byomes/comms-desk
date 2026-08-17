@@ -8,9 +8,9 @@ export default async function EmailComposePage() {
   if (!session) redirect('/login')
 
   return (
-    <div>
+    <div className="app-shell min-h-screen">
       <NavBar displayName={session.displayName} role={session.role} />
-      <main className="max-w-6xl mx-auto px-4 py-8">
+      <main className="max-w-6xl mx-auto px-4 py-8 lg:px-8 lg:py-10">
         <EmailComposer />
       </main>
     </div>

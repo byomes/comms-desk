@@ -23,14 +23,19 @@ export const STAGE_LABEL: Record<Stage, string> = {
 }
 
 export const STAGE_CLASS: Record<Stage, string> = {
-  drafted: 'bg-gray-100 text-gray-700',
-  ready: 'bg-amber-100 text-amber-800',
-  scheduled: 'bg-blue-100 text-blue-800',
-  sent: 'bg-green-100 text-green-800',
-  skipped: 'bg-gray-100 text-gray-400 line-through',
+  drafted: 'bg-slate-100 text-slate-600 ring-1 ring-inset ring-slate-200',
+  ready: 'bg-gold-300/40 text-gold-700 ring-1 ring-inset ring-gold-400/50',
+  scheduled: 'bg-navy-100 text-navy-700 ring-1 ring-inset ring-navy-200',
+  sent: 'bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-200',
+  skipped: 'bg-slate-100 text-slate-400 ring-1 ring-inset ring-slate-200 line-through',
 }
 
 export const PLATFORM_CLASS: Record<CommsSend['platform'], string> = {
-  facebook: 'border-l-4 border-l-indigo-500',
-  brevo: 'border-l-4 border-l-pink-500',
+  facebook: 'border-l-4 border-l-navy-600',
+  brevo: 'border-l-4 border-l-gold-500',
+}
+
+export const PLATFORM_LABEL: Record<CommsSend['platform'], string> = {
+  facebook: 'Facebook',
+  brevo: 'Email',
 }
