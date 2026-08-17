@@ -55,6 +55,7 @@ export interface CommsSend {
   id: number
   campaign_id: string
   send_date: string
+  send_time: string | null
   platform: 'facebook' | 'brevo'
   segment: 'public' | 'general' | 'donor' | 'arc'
   subject: string | null

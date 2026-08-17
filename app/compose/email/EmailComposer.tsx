@@ -12,7 +12,14 @@ import type { BrevoContact, BrevoList } from '@/lib/comms-api'
 import ContactPickerModal from './ContactPickerModal'
 
 function todayLocalDate(): string {
-  return new Date().toISOString().slice(0, 10)
+  const d = new Date()
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
+function nextHourLocalTime(): string {
+  const d = new Date()
+  d.setHours(d.getHours() + 1, 0, 0, 0)
+  return d.toTimeString().slice(0, 5)
 }
 
 const BLOCK_META: Record<Block['type'], { label: string; icon: typeof Type }> = {
@@ -213,6 +220,7 @@ export default function EmailComposer() {
   const [pickerOpen, setPickerOpen] = useState(false)
   const [customContacts, setCustomContacts] = useState<BrevoContact[]>([])
   const [sendDate, setSendDate] = useState(todayLocalDate())
+  const [sendTime, setSendTime] = useState(nextHourLocalTime())
   const [blocks, setBlocks] = useState<Block[]>([])
   const [previewHtml, setPreviewHtml] = useState('')
   const [saving, setSaving] = useState(false)
@@ -318,6 +326,7 @@ export default function EmailComposer() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           send_date: sendDate,
+          send_time: sendTime,
           platform: 'brevo',
           ...audience,
           subject,
@@ -425,6 +434,15 @@ export default function EmailComposer() {
               type="date"
               value={sendDate}
               onChange={(e) => setSendDate(e.target.value)}
+              className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gold-400 focus:border-gold-400"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-navy-800 mb-1.5">Send time</label>
+            <input
+              type="time"
+              value={sendTime}
+              onChange={(e) => setSendTime(e.target.value)}
               className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gold-400 focus:border-gold-400"
             />
           </div>

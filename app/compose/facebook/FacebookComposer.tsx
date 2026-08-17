@@ -6,7 +6,14 @@ import { toast } from 'sonner'
 import { ImagePlus, Send, Zap } from 'lucide-react'
 
 function todayLocalDate(): string {
-  return new Date().toISOString().slice(0, 10)
+  const d = new Date()
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
+function nextHourLocalTime(): string {
+  const d = new Date()
+  d.setHours(d.getHours() + 1, 0, 0, 0)
+  return d.toTimeString().slice(0, 5)
 }
 
 function BrowserChrome({ children }: { children: React.ReactNode }) {
@@ -29,6 +36,7 @@ export default function FacebookComposer() {
 
   const [body, setBody] = useState('')
   const [sendDate, setSendDate] = useState(todayLocalDate())
+  const [sendTime, setSendTime] = useState(nextHourLocalTime())
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [imagePath, setImagePath] = useState<string | null>(null)
   const [uploading, setUploading] = useState(false)
@@ -78,6 +86,7 @@ export default function FacebookComposer() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           send_date: sendDate,
+          send_time: sendTime,
           platform: 'facebook',
           segment: 'public',
           body_text: body,
@@ -115,7 +124,7 @@ export default function FacebookComposer() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          send_date: sendDate, platform: 'facebook', segment: 'public',
+          send_date: sendDate, send_time: sendTime, platform: 'facebook', segment: 'public',
           body_text: body, image_path: imagePath,
         }),
       })
@@ -157,14 +166,25 @@ export default function FacebookComposer() {
           {uploading && <p className="text-xs text-slate-400 mt-1.5">Uploading...</p>}
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-navy-800 mb-1.5">Send date</label>
-          <input
-            type="date"
-            value={sendDate}
-            onChange={(e) => setSendDate(e.target.value)}
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gold-400 focus:border-gold-400"
-          />
+        <div className="flex gap-3">
+          <div>
+            <label className="block text-sm font-medium text-navy-800 mb-1.5">Send date</label>
+            <input
+              type="date"
+              value={sendDate}
+              onChange={(e) => setSendDate(e.target.value)}
+              className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gold-400 focus:border-gold-400"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-navy-800 mb-1.5">Send time</label>
+            <input
+              type="time"
+              value={sendTime}
+              onChange={(e) => setSendTime(e.target.value)}
+              className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gold-400 focus:border-gold-400"
+            />
+          </div>
         </div>
 
         {error && <p className="text-sm text-red-600">{error}</p>}
