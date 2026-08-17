@@ -64,8 +64,21 @@ export interface CommsSend {
   source: string
   author_user_id: number
   sent_at: string | null
+  recipient_mode?: 'segment' | 'brevo_list' | 'custom_emails' | null
+  recipient_detail?: string | null
   holdReleasesAt?: string
   holdId?: number
+}
+
+export interface BrevoList {
+  id: number
+  name: string
+  count: number
+}
+
+export interface BrevoContact {
+  email: string
+  name: string
 }
 
 export interface LoginResult {
@@ -85,8 +98,17 @@ export const commsApi = {
 
   listSends: (asUserId: number) => watsonGet<CommsSend[]>(`/api/comms/sends?as_user_id=${asUserId}`),
 
-  createSend: (asUserId: number, body: Partial<CommsSend> & { send_date: string; platform: string; segment: string; body_text: string }) =>
-    watsonPost<{ id: number }>('/api/comms/sends', { as_user_id: asUserId, ...body }),
+  createSend: (
+    asUserId: number,
+    body: Partial<CommsSend> & { send_date: string; platform: string; body_text: string } & (
+      | { recipient_mode?: 'segment'; segment: string }
+      | { recipient_mode: 'brevo_list' | 'custom_emails'; recipient_detail: object }
+    ),
+  ) => watsonPost<{ id: number }>('/api/comms/sends', { as_user_id: asUserId, ...body }),
+
+  getBrevoLists: (asUserId: number) => watsonGet<BrevoList[]>(`/api/comms/brevo/lists?as_user_id=${asUserId}`),
+
+  getBrevoContacts: (asUserId: number) => watsonGet<BrevoContact[]>(`/api/comms/brevo/contacts?as_user_id=${asUserId}`),
 
   editSend: (id: number, asUserId: number, fields: Partial<CommsSend>) =>
     watsonPut<{ ok: boolean }>(`/api/comms/sends/${id}`, { as_user_id: asUserId, ...fields }),

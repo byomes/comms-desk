@@ -5,10 +5,11 @@ import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import {
   LayoutTemplate, Type, Image as ImageIcon, MousePointerClick, Minus, Quote as QuoteIcon,
-  ImagePlus, ChevronUp, ChevronDown, X, Zap,
+  ImagePlus, ChevronUp, ChevronDown, X, Zap, Users,
 } from 'lucide-react'
 import { type Block, blocksToMjml, newBlock } from '@/lib/mjml-blocks'
-import type { CommsSend } from '@/lib/comms-api'
+import type { BrevoContact, BrevoList } from '@/lib/comms-api'
+import ContactPickerModal from './ContactPickerModal'
 
 function todayLocalDate(): string {
   return new Date().toISOString().slice(0, 10)
@@ -23,12 +24,17 @@ const BLOCK_META: Record<Block['type'], { label: string; icon: typeof Type }> = 
   quote: { label: 'Quote', icon: QuoteIcon },
 }
 
-type Segment = Extract<CommsSend['segment'], 'general' | 'donor' | 'arc'>
+type StaticSegment = 'donor' | 'arc'
 
-const SEGMENT_LABEL: Record<Segment, string> = {
-  general: 'General list',
+const STATIC_SEGMENT_LABEL: Record<StaticSegment, string> = {
   donor: 'Donors',
   arc: 'ARC readers',
+}
+
+// "Send to" select values are either a static segment ('donor'/'arc') or a
+// live Brevo list, encoded as `list:<id>` since <select> options are strings.
+function listOptionValue(listId: number): string {
+  return `list:${listId}`
 }
 
 function BrowserChrome({ children }: { children: React.ReactNode }) {
@@ -202,13 +208,23 @@ function BlockEditor({
 export default function EmailComposer() {
   const router = useRouter()
   const [subject, setSubject] = useState('')
-  const [segment, setSegment] = useState<Segment>('general')
+  const [sendTo, setSendTo] = useState<string>('donor')
+  const [brevoLists, setBrevoLists] = useState<BrevoList[] | null>(null)
+  const [pickerOpen, setPickerOpen] = useState(false)
+  const [customContacts, setCustomContacts] = useState<BrevoContact[]>([])
   const [sendDate, setSendDate] = useState(todayLocalDate())
   const [blocks, setBlocks] = useState<Block[]>([])
   const [previewHtml, setPreviewHtml] = useState('')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    fetch('/api/comms/brevo/lists')
+      .then((res) => (res.ok ? res.json() : []))
+      .then((data: BrevoList[]) => setBrevoLists(data))
+      .catch(() => setBrevoLists([]))
+  }, [])
 
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current)
@@ -284,13 +300,26 @@ export default function EmailComposer() {
     try {
       const html = await renderFinalHtml()
 
+      const audience =
+        customContacts.length > 0
+          ? { recipient_mode: 'custom_emails' as const, recipient_detail: { emails: customContacts } }
+          : sendTo.startsWith('list:')
+          ? {
+              recipient_mode: 'brevo_list' as const,
+              recipient_detail: {
+                list_id: Number(sendTo.slice(5)),
+                list_name: brevoLists?.find((l) => listOptionValue(l.id) === sendTo)?.name ?? '',
+              },
+            }
+          : { segment: sendTo }
+
       const createRes = await fetch('/api/comms/sends', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           send_date: sendDate,
           platform: 'brevo',
-          segment,
+          ...audience,
           subject,
           body_text: html,
         }),
@@ -337,18 +366,58 @@ export default function EmailComposer() {
           />
         </div>
 
-        <div className="flex gap-4">
+        <div className="flex gap-4 flex-wrap">
           <div>
             <label className="block text-sm font-medium text-navy-800 mb-1.5">Send to</label>
-            <select
-              value={segment}
-              onChange={(e) => setSegment(e.target.value as Segment)}
-              className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gold-400 focus:border-gold-400"
-            >
-              {(Object.keys(SEGMENT_LABEL) as Segment[]).map((s) => (
-                <option key={s} value={s}>{SEGMENT_LABEL[s]}</option>
-              ))}
-            </select>
+            {customContacts.length > 0 ? (
+              <div className="flex items-center gap-2 text-sm">
+                <span className="inline-flex items-center gap-1.5 rounded-lg bg-navy-50 text-navy-900 px-3 py-2">
+                  <Users size={14} /> {customContacts.length} people selected
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setPickerOpen(true)}
+                  className="text-xs font-medium text-navy-700 hover:underline"
+                >
+                  Edit
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setCustomContacts([])}
+                  className="text-xs font-medium text-slate-400 hover:underline"
+                >
+                  Clear
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <select
+                  value={sendTo}
+                  onChange={(e) => setSendTo(e.target.value)}
+                  className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gold-400 focus:border-gold-400"
+                >
+                  {(Object.keys(STATIC_SEGMENT_LABEL) as StaticSegment[]).map((s) => (
+                    <option key={s} value={s}>{STATIC_SEGMENT_LABEL[s]}</option>
+                  ))}
+                  {brevoLists === null ? (
+                    <option disabled>Loading lists...</option>
+                  ) : (
+                    brevoLists.map((l) => (
+                      <option key={l.id} value={listOptionValue(l.id)}>
+                        {l.name} ({l.count})
+                      </option>
+                    ))
+                  )}
+                </select>
+                <button
+                  type="button"
+                  onClick={() => setPickerOpen(true)}
+                  className="text-xs font-medium text-navy-700 hover:underline whitespace-nowrap"
+                >
+                  or choose specific people
+                </button>
+              </div>
+            )}
           </div>
           <div>
             <label className="block text-sm font-medium text-navy-800 mb-1.5">Send date</label>
@@ -470,6 +539,17 @@ export default function EmailComposer() {
           )}
         </BrowserChrome>
       </div>
+
+      {pickerOpen && (
+        <ContactPickerModal
+          initialSelected={customContacts}
+          onCancel={() => setPickerOpen(false)}
+          onConfirm={(selected) => {
+            setCustomContacts(selected)
+            setPickerOpen(false)
+          }}
+        />
+      )}
     </div>
   )
 }
