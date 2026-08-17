@@ -193,6 +193,21 @@ export default function CalendarView({ role }: { role: 'volunteer' | 'admin' }) 
         onSelectDate={setSelectedDate}
       />
 
+      <div className="flex gap-2">
+        <a
+          href="/compose/facebook"
+          className="inline-flex items-center gap-1.5 text-sm font-medium bg-navy-900 hover:bg-navy-800 text-white px-4 py-2 rounded-lg transition-colors"
+        >
+          <FacebookGlyph size={15} /> New Facebook post
+        </a>
+        <a
+          href="/compose/email"
+          className="inline-flex items-center gap-1.5 text-sm font-medium border border-slate-300 hover:bg-slate-50 text-navy-900 px-4 py-2 rounded-lg transition-colors"
+        >
+          <Mail size={15} /> New email
+        </a>
+      </div>
+
       <div>
         <h2 className="text-sm font-semibold text-slate-500 mb-3">{selectedLabel}</h2>
         {selectedItems.length === 0 ? (
