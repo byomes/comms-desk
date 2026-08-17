@@ -1,6 +1,6 @@
 'use client'
 
-import { Mail, Clock, X } from 'lucide-react'
+import { Mail, Clock, X, Camera } from 'lucide-react'
 import FacebookGlyph from '../components/icons/FacebookGlyph'
 import type { CommsSend } from '@/lib/comms-api'
 import { stageOf, minutesUntil, STAGE_LABEL, STAGE_CLASS, PLATFORM_CLASS, PLATFORM_LABEL } from '@/lib/status'
@@ -13,12 +13,14 @@ export default function SendCard({
   actioning,
   onMarkReady,
   onCancel,
+  onAddImage,
 }: {
   send: CommsSend
   role: 'volunteer' | 'admin'
   actioning: number | null
   onMarkReady: (id: number, sendNow: boolean) => void
   onCancel: (id: number) => void
+  onAddImage?: (send: CommsSend) => void
 }) {
   const stage = stageOf(send)
   const label = send.subject || send.body_text.split('\n')[0].slice(0, 80)
@@ -47,6 +49,14 @@ export default function SendCard({
               STAGE_LABEL[stage]
             )}
           </span>
+          {!!send.needs_image && (
+            <button
+              onClick={() => onAddImage?.(send)}
+              className="inline-flex items-center gap-1 text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200 hover:bg-amber-100 px-2 py-0.5 rounded-full transition-colors"
+            >
+              <Camera size={11} strokeWidth={2.25} /> Needs photo
+            </button>
+          )}
         </div>
         <p className="text-sm text-navy-900 truncate">{label}</p>
       </div>
