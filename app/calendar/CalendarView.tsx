@@ -8,6 +8,7 @@ import type { CommsSend } from '@/lib/comms-api'
 import { stageOf } from '@/lib/status'
 import MonthGrid from './MonthGrid'
 import SendCard from './SendCard'
+import AddImageModal from './AddImageModal'
 import { toDateKey } from './dateGrid'
 
 function SkeletonCard() {
@@ -33,6 +34,7 @@ export default function CalendarView({ role }: { role: 'volunteer' | 'admin' }) 
     return new Date(now.getFullYear(), now.getMonth(), 1)
   })
   const [selectedDate, setSelectedDate] = useState<string>(() => toDateKey(new Date()))
+  const [imageModalSend, setImageModalSend] = useState<CommsSend | null>(null)
 
   const load = useCallback(async () => {
     const res = await fetch('/api/comms/sends')
@@ -159,11 +161,29 @@ export default function CalendarView({ role }: { role: 'volunteer' | 'admin' }) 
               </h2>
               <div className="space-y-2.5">
                 {grouped[date].map((send) => (
-                  <SendCard key={send.id} send={send} role={role} actioning={actioning} onMarkReady={markReady} onCancel={cancel} />
+                  <SendCard
+                    key={send.id}
+                    send={send}
+                    role={role}
+                    actioning={actioning}
+                    onMarkReady={markReady}
+                    onCancel={cancel}
+                    onAddImage={setImageModalSend}
+                  />
                 ))}
               </div>
             </div>
           ))
+        )}
+        {imageModalSend && (
+          <AddImageModal
+            send={imageModalSend}
+            onCancel={() => setImageModalSend(null)}
+            onSaved={() => {
+              setImageModalSend(null)
+              load()
+            }}
+          />
         )}
       </div>
     )
@@ -215,11 +235,30 @@ export default function CalendarView({ role }: { role: 'volunteer' | 'admin' }) 
         ) : (
           <div className="space-y-2.5">
             {selectedItems.map((send) => (
-              <SendCard key={send.id} send={send} role={role} actioning={actioning} onMarkReady={markReady} onCancel={cancel} />
+              <SendCard
+                key={send.id}
+                send={send}
+                role={role}
+                actioning={actioning}
+                onMarkReady={markReady}
+                onCancel={cancel}
+                onAddImage={setImageModalSend}
+              />
             ))}
           </div>
         )}
       </div>
+
+      {imageModalSend && (
+        <AddImageModal
+          send={imageModalSend}
+          onCancel={() => setImageModalSend(null)}
+          onSaved={() => {
+            setImageModalSend(null)
+            load()
+          }}
+        />
+      )}
     </div>
   )
 }

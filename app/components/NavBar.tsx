@@ -3,13 +3,14 @@
 import { useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Calendar, Mail, LogOut, Menu, X, Send } from 'lucide-react'
+import { Calendar, Mail, LogOut, Menu, X, Send, UploadCloud } from 'lucide-react'
 import FacebookGlyph from './icons/FacebookGlyph'
 
 const NAV_ITEMS = [
   { href: '/calendar', label: 'Calendar', icon: Calendar },
   { href: '/compose/facebook', label: 'New Facebook post', icon: FacebookGlyph },
   { href: '/compose/email', label: 'New email', icon: Mail },
+  { href: '/compose/batch', label: 'Batch import', icon: UploadCloud },
 ]
 
 function Wordmark() {
