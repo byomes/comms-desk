@@ -75,7 +75,7 @@ export default function MonthGrid({
             <button
               key={key}
               onClick={() => onSelectDate(key)}
-              className={`min-h-[92px] p-1.5 flex flex-col gap-1 text-left border-b border-slate-100 transition-colors ${
+              className={`min-h-[56px] sm:min-h-[92px] p-1 sm:p-1.5 flex flex-col gap-1 text-left border-b border-slate-100 transition-colors ${
                 (i + 1) % 7 !== 0 ? 'border-r' : ''
               } ${inMonth ? 'bg-white' : 'bg-slate-50/60'} ${
                 isSelected ? 'ring-2 ring-inset ring-gold-400' : 'hover:bg-slate-50'
@@ -88,7 +88,24 @@ export default function MonthGrid({
               >
                 {d.getDate()}
               </span>
-              <div className="flex flex-col gap-0.5">
+
+              {/* Mobile: compact dots, full text is cramped below ~sm */}
+              {items.length > 0 && (
+                <div className="flex sm:hidden flex-wrap items-center gap-0.5 px-0.5">
+                  {items.slice(0, 4).map((s) => (
+                    <span
+                      key={s.id}
+                      className={`h-1.5 w-1.5 rounded-full ${s.platform === 'facebook' ? 'bg-navy-600' : 'bg-gold-500'}`}
+                    />
+                  ))}
+                  {items.length > 4 && (
+                    <span className="text-[9px] leading-none text-slate-400">+{items.length - 4}</span>
+                  )}
+                </div>
+              )}
+
+              {/* sm+: truncated text chips */}
+              <div className="hidden sm:flex sm:flex-col sm:gap-0.5">
                 {items.slice(0, 3).map((s) => (
                   <span
                     key={s.id}
