@@ -105,7 +105,7 @@ export default function CalendarView({ role }: { role: 'volunteer' | 'admin' }) 
     )
   }
 
-  if (dates.length === 0) {
+  if (dates.length === 0 && viewMode === 'list') {
     return (
       <div className="flex flex-col items-center justify-center text-center py-20 px-6 bg-white rounded-xl border border-dashed border-slate-300">
         <div className="flex h-14 w-14 items-center justify-center rounded-full bg-navy-50 mb-4">
