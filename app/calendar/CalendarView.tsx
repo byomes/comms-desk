@@ -105,34 +105,6 @@ export default function CalendarView({ role }: { role: 'volunteer' | 'admin' }) 
     )
   }
 
-  if (dates.length === 0 && viewMode === 'list') {
-    return (
-      <div className="flex flex-col items-center justify-center text-center py-20 px-6 bg-white rounded-xl border border-dashed border-slate-300">
-        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-navy-50 mb-4">
-          <CalendarX size={26} className="text-navy-500" strokeWidth={1.75} />
-        </div>
-        <h2 className="text-base font-semibold text-navy-900 mb-1.5">Nothing scheduled yet</h2>
-        <p className="text-sm text-slate-500 max-w-xs mb-6">
-          Start a Facebook post or an email and it&apos;ll show up here once it&apos;s scheduled.
-        </p>
-        <div className="flex gap-2">
-          <a
-            href="/compose/facebook"
-            className="inline-flex items-center gap-1.5 text-sm font-medium bg-navy-900 hover:bg-navy-800 text-white px-4 py-2 rounded-lg transition-colors"
-          >
-            <FacebookGlyph size={15} /> Facebook post
-          </a>
-          <a
-            href="/compose/email"
-            className="inline-flex items-center gap-1.5 text-sm font-medium border border-slate-300 hover:bg-slate-50 text-navy-900 px-4 py-2 rounded-lg transition-colors"
-          >
-            <Mail size={15} /> Email
-          </a>
-        </div>
-      </div>
-    )
-  }
-
   const ToggleButton = ({ mode, icon: Icon, label }: { mode: 'grid' | 'list'; icon: typeof LayoutGrid; label: string }) => (
     <button
       onClick={() => setViewMode(mode)}
@@ -153,20 +125,46 @@ export default function CalendarView({ role }: { role: 'volunteer' | 'admin' }) 
             <ToggleButton mode="list" icon={List} label="List" />
           </div>
         </div>
-        {dates.map((date) => (
-          <div key={date}>
-            <h2 className="text-sm font-semibold text-slate-500 mb-3">
-              {new Date(date + 'T00:00:00').toLocaleDateString(undefined, {
-                weekday: 'long', month: 'long', day: 'numeric',
-              })}
-            </h2>
-            <div className="space-y-2.5">
-              {grouped[date].map((send) => (
-                <SendCard key={send.id} send={send} role={role} actioning={actioning} onMarkReady={markReady} onCancel={cancel} />
-              ))}
+        {dates.length === 0 ? (
+          <div className="flex flex-col items-center justify-center text-center py-20 px-6 bg-white rounded-xl border border-dashed border-slate-300">
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-navy-50 mb-4">
+              <CalendarX size={26} className="text-navy-500" strokeWidth={1.75} />
+            </div>
+            <h2 className="text-base font-semibold text-navy-900 mb-1.5">Nothing scheduled yet</h2>
+            <p className="text-sm text-slate-500 max-w-xs mb-6">
+              Start a Facebook post or an email and it&apos;ll show up here once it&apos;s scheduled.
+            </p>
+            <div className="flex gap-2">
+              <a
+                href="/compose/facebook"
+                className="inline-flex items-center gap-1.5 text-sm font-medium bg-navy-900 hover:bg-navy-800 text-white px-4 py-2 rounded-lg transition-colors"
+              >
+                <FacebookGlyph size={15} /> Facebook post
+              </a>
+              <a
+                href="/compose/email"
+                className="inline-flex items-center gap-1.5 text-sm font-medium border border-slate-300 hover:bg-slate-50 text-navy-900 px-4 py-2 rounded-lg transition-colors"
+              >
+                <Mail size={15} /> Email
+              </a>
             </div>
           </div>
-        ))}
+        ) : (
+          dates.map((date) => (
+            <div key={date}>
+              <h2 className="text-sm font-semibold text-slate-500 mb-3">
+                {new Date(date + 'T00:00:00').toLocaleDateString(undefined, {
+                  weekday: 'long', month: 'long', day: 'numeric',
+                })}
+              </h2>
+              <div className="space-y-2.5">
+                {grouped[date].map((send) => (
+                  <SendCard key={send.id} send={send} role={role} actioning={actioning} onMarkReady={markReady} onCancel={cancel} />
+                ))}
+              </div>
+            </div>
+          ))
+        )}
       </div>
     )
   }
