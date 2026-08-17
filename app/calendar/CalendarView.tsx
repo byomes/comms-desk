@@ -2,11 +2,12 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { toast } from 'sonner'
-import { CalendarX, ThumbsUp, Mail, Clock, X } from 'lucide-react'
+import { CalendarX, Mail, Clock, X } from 'lucide-react'
+import FacebookGlyph from '../components/icons/FacebookGlyph'
 import type { CommsSend } from '@/lib/comms-api'
 import { stageOf, minutesUntil, STAGE_LABEL, STAGE_CLASS, PLATFORM_CLASS, PLATFORM_LABEL } from '@/lib/status'
 
-const PLATFORM_ICON = { facebook: ThumbsUp, brevo: Mail } as const
+const PLATFORM_ICON = { facebook: FacebookGlyph, brevo: Mail } as const
 
 function SkeletonCard() {
   return (
@@ -108,7 +109,7 @@ export default function CalendarView({ role }: { role: 'volunteer' | 'admin' }) 
             href="/compose/facebook"
             className="inline-flex items-center gap-1.5 text-sm font-medium bg-navy-900 hover:bg-navy-800 text-white px-4 py-2 rounded-lg transition-colors"
           >
-            <ThumbsUp size={15} /> Facebook post
+            <FacebookGlyph size={15} /> Facebook post
           </a>
           <a
             href="/compose/email"
