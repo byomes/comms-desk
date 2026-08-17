@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'mjml (string) required' }, { status: 400 })
   }
 
-  const result = mjml2html(mjml, { validationLevel: 'soft' })
+  const result = await mjml2html(mjml, { validationLevel: 'soft' })
   return NextResponse.json({
     html: result.html,
     errors: result.errors.map((e) => e.formattedMessage),
