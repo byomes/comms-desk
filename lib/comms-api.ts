@@ -61,6 +61,7 @@ export interface CommsSend {
   subject: string | null
   body_text: string
   image_path: string | null
+  image_url?: string | null
   needs_image?: number
   status: 'scheduled' | 'previewed' | 'approved' | 'edited' | 'sent' | 'skipped'
   source: string
