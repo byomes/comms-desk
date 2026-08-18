@@ -8,6 +8,27 @@ import FacebookPostPreview from '../components/FacebookPostPreview'
 
 const EDITABLE_SEGMENTS = ['general', 'donor', 'arc'] as const
 
+function EmailPreview({ html }: { html: string }) {
+  return (
+    <div>
+      <p className="text-sm font-medium mb-2 text-slate-500">Preview</p>
+      <div className="bg-white rounded-xl border border-slate-200 shadow-card overflow-hidden">
+        <div className="flex items-center gap-1.5 px-3 py-2.5 bg-slate-100 border-b border-slate-200">
+          <span className="h-2.5 w-2.5 rounded-full bg-slate-300" />
+          <span className="h-2.5 w-2.5 rounded-full bg-slate-300" />
+          <span className="h-2.5 w-2.5 rounded-full bg-slate-300" />
+          <span className="ml-2 text-[11px] text-slate-400 font-medium">Inbox preview</span>
+        </div>
+        {html.trim() ? (
+          <iframe srcDoc={html} title="Email preview" className="w-full h-[500px] bg-white" sandbox="" />
+        ) : (
+          <p className="text-sm text-slate-400 p-10 text-center bg-white">Nothing to preview yet.</p>
+        )}
+      </div>
+    </div>
+  )
+}
+
 export default function EditPostModal({
   send,
   onCancel,
@@ -61,7 +82,7 @@ export default function EditPostModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-navy-950/40 p-4">
-      <div className={`w-full bg-white rounded-xl border border-slate-200 shadow-xl ${isEmail ? 'max-w-lg' : 'max-w-3xl'}`}>
+      <div className="w-full max-w-3xl bg-white rounded-xl border border-slate-200 shadow-xl">
         <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200">
           <h2 className="text-sm font-semibold text-navy-900">Edit {isEmail ? 'email' : 'post'}</h2>
           <button
@@ -73,7 +94,7 @@ export default function EditPostModal({
           </button>
         </div>
 
-        <div className={`px-4 py-4 max-h-[70vh] overflow-y-auto ${isEmail ? 'space-y-4' : 'grid grid-cols-1 md:grid-cols-2 gap-6'}`}>
+        <div className="px-4 py-4 max-h-[70vh] overflow-y-auto grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-4">
           {isEmail && (
             <div>
@@ -142,7 +163,7 @@ export default function EditPostModal({
           {error && <p className="text-sm text-red-600">{error}</p>}
         </div>
 
-        {!isEmail && <FacebookPostPreview body={bodyText} imageUrl={send.image_url} />}
+        {isEmail ? <EmailPreview html={bodyText} /> : <FacebookPostPreview body={bodyText} imageUrl={send.image_url} />}
         </div>
 
         <div className="flex justify-end gap-2 px-4 py-3 border-t border-slate-200">
