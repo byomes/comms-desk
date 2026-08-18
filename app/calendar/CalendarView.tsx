@@ -9,6 +9,7 @@ import { stageOf } from '@/lib/status'
 import MonthGrid from './MonthGrid'
 import SendCard from './SendCard'
 import AddImageModal from './AddImageModal'
+import EditPostModal from './EditPostModal'
 import { toDateKey } from './dateGrid'
 
 function SkeletonCard() {
@@ -35,6 +36,7 @@ export default function CalendarView({ role }: { role: 'volunteer' | 'admin' }) 
   })
   const [selectedDate, setSelectedDate] = useState<string>(() => toDateKey(new Date()))
   const [imageModalSend, setImageModalSend] = useState<CommsSend | null>(null)
+  const [editSend, setEditSend] = useState<CommsSend | null>(null)
 
   const load = useCallback(async () => {
     const res = await fetch('/api/comms/sends')
@@ -169,6 +171,7 @@ export default function CalendarView({ role }: { role: 'volunteer' | 'admin' }) 
                     onMarkReady={markReady}
                     onCancel={cancel}
                     onAddImage={setImageModalSend}
+                    onEdit={setEditSend}
                   />
                 ))}
               </div>
@@ -181,6 +184,16 @@ export default function CalendarView({ role }: { role: 'volunteer' | 'admin' }) 
             onCancel={() => setImageModalSend(null)}
             onSaved={() => {
               setImageModalSend(null)
+              load()
+            }}
+          />
+        )}
+        {editSend && (
+          <EditPostModal
+            send={editSend}
+            onCancel={() => setEditSend(null)}
+            onSaved={() => {
+              setEditSend(null)
               load()
             }}
           />
@@ -243,6 +256,7 @@ export default function CalendarView({ role }: { role: 'volunteer' | 'admin' }) 
                 onMarkReady={markReady}
                 onCancel={cancel}
                 onAddImage={setImageModalSend}
+                onEdit={setEditSend}
               />
             ))}
           </div>
@@ -255,6 +269,16 @@ export default function CalendarView({ role }: { role: 'volunteer' | 'admin' }) 
           onCancel={() => setImageModalSend(null)}
           onSaved={() => {
             setImageModalSend(null)
+            load()
+          }}
+        />
+      )}
+      {editSend && (
+        <EditPostModal
+          send={editSend}
+          onCancel={() => setEditSend(null)}
+          onSaved={() => {
+            setEditSend(null)
             load()
           }}
         />
