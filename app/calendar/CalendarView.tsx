@@ -10,6 +10,7 @@ import MonthGrid from './MonthGrid'
 import SendCard from './SendCard'
 import AddImageModal from './AddImageModal'
 import EditPostModal from './EditPostModal'
+import EmailPreviewModal from './EmailPreviewModal'
 import { toDateKey } from './dateGrid'
 
 function SkeletonCard() {
@@ -37,6 +38,7 @@ export default function CalendarView({ role }: { role: 'volunteer' | 'admin' }) 
   const [selectedDate, setSelectedDate] = useState<string>(() => toDateKey(new Date()))
   const [imageModalSend, setImageModalSend] = useState<CommsSend | null>(null)
   const [editSend, setEditSend] = useState<CommsSend | null>(null)
+  const [previewSend, setPreviewSend] = useState<CommsSend | null>(null)
 
   const load = useCallback(async () => {
     const res = await fetch('/api/comms/sends')
@@ -52,6 +54,7 @@ export default function CalendarView({ role }: { role: 'volunteer' | 'admin' }) 
 
   async function markReady(id: number, sendNow: boolean) {
     setActioning(id)
+    const isEmail = sends.find((s) => s.id === id)?.platform === 'brevo'
     try {
       const res = await fetch(`/api/comms/sends/${id}/ready`, {
         method: 'POST',
@@ -59,9 +62,28 @@ export default function CalendarView({ role }: { role: 'volunteer' | 'admin' }) 
         body: JSON.stringify({ sendNow }),
       })
       if (res.ok) {
-        toast.success(sendNow ? 'Sending — you have 12 minutes to undo.' : 'Marked ready.')
+        toast.success(
+          isEmail ? 'Marked ready — an admin still needs to approve it before it sends.'
+          : sendNow ? 'Sending — you have 12 minutes to undo.'
+          : 'Marked ready.'
+        )
       } else {
         toast.error('Something went wrong. Please try again.')
+      }
+      await load()
+    } finally {
+      setActioning(null)
+    }
+  }
+
+  async function approve(id: number) {
+    setActioning(id)
+    try {
+      const res = await fetch(`/api/comms/sends/${id}/approve-send`, { method: 'POST' })
+      if (res.ok) {
+        toast.success('Approved — it will send at its scheduled time.')
+      } else {
+        toast.error('Could not approve. Please try again.')
       }
       await load()
     } finally {
@@ -172,6 +194,8 @@ export default function CalendarView({ role }: { role: 'volunteer' | 'admin' }) 
                     onCancel={cancel}
                     onAddImage={setImageModalSend}
                     onEdit={setEditSend}
+                    onPreview={setPreviewSend}
+                    onApprove={approve}
                   />
                 ))}
               </div>
@@ -198,6 +222,7 @@ export default function CalendarView({ role }: { role: 'volunteer' | 'admin' }) 
             }}
           />
         )}
+        {previewSend && <EmailPreviewModal send={previewSend} onClose={() => setPreviewSend(null)} />}
       </div>
     )
   }
@@ -257,6 +282,8 @@ export default function CalendarView({ role }: { role: 'volunteer' | 'admin' }) 
                 onCancel={cancel}
                 onAddImage={setImageModalSend}
                 onEdit={setEditSend}
+                onPreview={setPreviewSend}
+                onApprove={approve}
               />
             ))}
           </div>
@@ -283,6 +310,7 @@ export default function CalendarView({ role }: { role: 'volunteer' | 'admin' }) 
           }}
         />
       )}
+      {previewSend && <EmailPreviewModal send={previewSend} onClose={() => setPreviewSend(null)} />}
     </div>
   )
 }

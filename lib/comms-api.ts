@@ -66,6 +66,7 @@ export interface CommsSend {
   source: string
   author_user_id: number
   sent_at: string | null
+  admin_approved_at?: string | null
   recipient_mode?: 'segment' | 'brevo_list' | 'custom_emails' | null
   recipient_detail?: string | null
   holdReleasesAt?: string
@@ -152,6 +153,9 @@ export const commsApi = {
 
   cancelSend: (id: number, asUserId: number) =>
     watsonPost<{ status: string }>(`/api/comms/sends/${id}/cancel`, { as_user_id: asUserId }),
+
+  approveSend: (id: number, asUserId: number) =>
+    watsonPost<{ status: string }>(`/api/comms/sends/${id}/approve-send`, { as_user_id: asUserId }),
 
   sentLog: (asUserId: number) => watsonGet<CommsSend[]>(`/api/comms/sent-log?as_user_id=${asUserId}`),
 

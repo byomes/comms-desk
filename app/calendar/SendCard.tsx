@@ -1,6 +1,6 @@
 'use client'
 
-import { Mail, Clock, X, Camera, Pencil } from 'lucide-react'
+import { Mail, Clock, X, Camera, Pencil, Eye, ShieldCheck } from 'lucide-react'
 import FacebookGlyph from '../components/icons/FacebookGlyph'
 import type { CommsSend } from '@/lib/comms-api'
 import { stageOf, minutesUntil, STAGE_LABEL, STAGE_CLASS, PLATFORM_CLASS, PLATFORM_LABEL } from '@/lib/status'
@@ -15,6 +15,8 @@ export default function SendCard({
   onCancel,
   onAddImage,
   onEdit,
+  onPreview,
+  onApprove,
 }: {
   send: CommsSend
   role: 'volunteer' | 'admin'
@@ -23,6 +25,8 @@ export default function SendCard({
   onCancel: (id: number) => void
   onAddImage?: (send: CommsSend) => void
   onEdit?: (send: CommsSend) => void
+  onPreview?: (send: CommsSend) => void
+  onApprove?: (id: number) => void
 }) {
   const stage = stageOf(send)
   const label = send.subject || send.body_text.split('\n')[0].slice(0, 80)
@@ -64,7 +68,15 @@ export default function SendCard({
       </div>
 
       <div className="flex items-center gap-2 shrink-0 ml-4">
-        {stage === 'drafted' && (
+        {send.platform === 'brevo' && (
+          <button
+            onClick={() => onPreview?.(send)}
+            className="inline-flex items-center gap-1 text-xs font-medium text-slate-500 hover:text-navy-900 px-2 py-1.5 rounded-lg hover:bg-slate-100 transition-colors"
+          >
+            <Eye size={13} /> Preview
+          </button>
+        )}
+        {(stage === 'drafted' || stage === 'pending_approval') && (
           <button
             disabled={actioning === send.id}
             onClick={() => onEdit?.(send)}
@@ -82,13 +94,22 @@ export default function SendCard({
             Mark ready
           </button>
         )}
-        {stage === 'drafted' && send.send_date <= new Date().toISOString().slice(0, 10) && (
+        {stage === 'drafted' && send.platform === 'facebook' && send.send_date <= new Date().toISOString().slice(0, 10) && (
           <button
             disabled={actioning === send.id}
             onClick={() => onMarkReady(send.id, true)}
             className="text-xs font-medium bg-gold-500 hover:bg-gold-600 disabled:opacity-50 text-navy-950 px-3 py-1.5 rounded-lg transition-colors"
           >
             Send now
+          </button>
+        )}
+        {stage === 'pending_approval' && role === 'admin' && (
+          <button
+            disabled={actioning === send.id}
+            onClick={() => onApprove?.(send.id)}
+            className="inline-flex items-center gap-1.5 text-xs font-medium bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-white px-3 py-1.5 rounded-lg transition-colors"
+          >
+            <ShieldCheck size={13} /> Approve to send
           </button>
         )}
         {stage === 'ready' && (
@@ -100,7 +121,7 @@ export default function SendCard({
             <X size={13} /> Undo
           </button>
         )}
-        {stage === 'scheduled' && role === 'admin' && (
+        {(stage === 'scheduled' || stage === 'pending_approval') && role === 'admin' && (
           <button
             disabled={actioning === send.id}
             onClick={() => onCancel(send.id)}

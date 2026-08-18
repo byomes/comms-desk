@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import {
   LayoutTemplate, Type, Image as ImageIcon, MousePointerClick, Minus, Quote as QuoteIcon,
-  ImagePlus, ChevronUp, ChevronDown, X, Zap, Users,
+  ImagePlus, ChevronUp, ChevronDown, X, Users,
 } from 'lucide-react'
 import { type Block, blocksToMjml, newBlock } from '@/lib/mjml-blocks'
 import type { BrevoContact, BrevoList } from '@/lib/comms-api'
@@ -294,7 +294,7 @@ export default function EmailComposer() {
     return data.html as string
   }
 
-  async function save(mode: 'draft' | 'ready' | 'now') {
+  async function save(mode: 'draft' | 'ready') {
     if (!subject.trim()) {
       setError('Give it a subject line first.')
       return
@@ -336,18 +336,17 @@ export default function EmailComposer() {
       if (!createRes.ok) throw new Error('Save failed')
       const { id } = await createRes.json()
 
-      if (mode !== 'draft') {
+      if (mode === 'ready') {
         const readyRes = await fetch(`/api/comms/sends/${id}/ready`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ sendNow: mode === 'now' }),
+          body: JSON.stringify({ sendNow: false }),
         })
         if (!readyRes.ok) throw new Error('Could not mark ready')
       }
 
       toast.success(
-        mode === 'now' ? 'Sending — 12 minutes to undo on the calendar.'
-        : mode === 'ready' ? 'Email marked ready.'
+        mode === 'ready' ? 'Marked ready — an admin still needs to approve it before it sends.'
         : 'Draft saved.'
       )
       router.push('/calendar')
@@ -357,8 +356,6 @@ export default function EmailComposer() {
       setSaving(false)
     }
   }
-
-  const isToday = sendDate <= todayLocalDate()
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -530,21 +527,10 @@ export default function EmailComposer() {
           >
             Mark ready
           </button>
-          {isToday && (
-            <button
-              onClick={() => save('now')}
-              disabled={saving}
-              className="inline-flex items-center gap-1.5 text-sm font-medium bg-gold-500 hover:bg-gold-600 disabled:opacity-50 text-navy-950 px-4 py-2 rounded-lg transition-colors"
-            >
-              <Zap size={14} /> Send now
-            </button>
-          )}
         </div>
-        {isToday && (
-          <p className="text-xs text-slate-400">
-            &quot;Send now&quot; gives you a 12-minute window to undo before it actually goes out.
-          </p>
-        )}
+        <p className="text-xs text-slate-400">
+          Every email needs an admin&apos;s approval before it actually sends — see the calendar.
+        </p>
       </div>
 
       <div>
